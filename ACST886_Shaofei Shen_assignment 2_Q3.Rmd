@@ -1,0 +1,138 @@
+---
+title: "Shaofei_Shen_45503745_assignment 2_Q3"
+author: "Shaofei Shen"
+date: "2019/9/5"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Q3
+#### 5.7
+impute data
+```{r}
+x<-c()
+x[70:75]<-(70:75)
+Ex<-c()
+Ex[70:75]<-c(1000,1005,1010,1008,1006,998)
+dx<-c()
+dx[70:75]<-c(80,90,95,105,115,125)
+x
+Ex
+dx
+```
+
+Gompertz:$\mu_x=BC^x$, which is not linear and need transformation 
+Run a regression line on $ln\mu_x=\alpha + \beta*x$
+```{r}
+qx<-dx/Ex
+log_qx<-log(qx)
+lm(log_qx~x)
+```
+The outcome is $\alpha=lnB$ and $\beta=LnC$ and need to transfer back using exponential as the starting point
+$B=e^\alpha$ and $C=e^\beta$
+```{r}
+start_B<-exp(-8.67325)
+start_c<-exp(0.08788)
+start_B
+start_c
+```
+Use the maximum likelihood to find out the MLE. Since "nlm" is used to minimize the function, we need to add the negative value to the function. In order to find out the nimimized value. 
+```{r}
+loglik<-function(theta){
+  loglik=sum(Ex*theta[1]*theta[2]^x)-sum(dx*log(Ex*theta[1]*theta[2]^x))
+  return(loglik)
+}
+nlm(loglik,p=c(0.0001711021,1.091857),hessian=TRUE)
+```
+The MLE is not converge, might become the function is not linear or have multiple optimal.
+find out the graduates $\mu_x$
+```{r}
+muhat<-0.000171102*1.0918570000^x
+muhat
+```
+
+#### 5.8
+imput data 
+```{r}
+x_2<-c()
+x_2[1:20]<-(30:49)
+x_2
+```
+```{r}
+Ex_2<-c()
+Ex_2[1:20]<-c(70000,66672,68375,65420,61779,66091,68514,69560,65000,66279,67300,65368,65391,62917,66537,62302,62145,63856,61097,61110)
+Ex_2
+```
+```{r}
+dx_2<-c()
+dx_2[1:20]<-c(39,43,34,31,23,50,48,43,48,47,62,63,84,86,120,121,122,162,151,184)
+dx_2
+```
+```{r}
+qx_2<-dx_2/Ex_2
+qx_2
+```
+run regression on $ln(\frac{q_x}{1-q_x})=a+bx$ to find the starting point 
+```{r}
+y<-log(qx_2/(1-qx_2))
+lm(y~x_2)
+```
+```{r}
+loglik_2<-function(theta){
+  f_2=sum(Ex_2*(y-(theta[1]+theta[2]*x_2))^2)
+  return(f_2)
+}
+nlm(loglik_2,p=c(-10.8629,0.1003))
+```
+find out the graduates $q_x$
+```{r}
+qxhat_1<-exp(-10.8628995+0.1002814*x_2)/(1-exp(-10.8628995+0.1002814*x_2))
+qxhat_1
+```
+
+#### 5.9
+impute data into R
+```{r}
+x<-c()
+x[1:21]<-(47:67)
+x
+```
+```{r}
+Ex<-c()
+Ex[1:21]<-c(166,187,218,243,276,302,347,390,430,494,558,628,701,813,917,1040,1182,1299,1432,1596,1752)
+Ex
+```
+```{r}
+dx<-c()
+dx[1:21]<-c(2,2,4,6,2,4,7,3,9,9,8,11,14,18,18,24,30,43,41,54,64)
+dx
+```
+```{r}
+qs<-c()
+qs[1:21]<-c(0.00505,0.00570,0.00644,0.00728,0.00826,0.00930,0.01051,0.01184,0.01331,0.01492,0.01668,0.01859,0.02065,0.02287,0.02525,0.02778,0.03049,0.03339,0.03648,0.03978,0.04332)
+qs
+```
+```{r}
+qx<-dx/Ex
+qx
+```
+run a regression line ($q_x$:dependent variable; $q_x^s$: independent variable)to decide the starting point of maximum likelihood estimator 
+```{r}
+lm(qx~qs)
+```
+
+```{r}
+loglik<-function(theta){
+  f=sum(Ex*(qx-(theta[1]+theta[2]*qs))^2)
+  return(f)
+}
+nlm(loglik,p=c(0.00927,0.570217))
+```
+find out the graduates $q_x$
+```{r}
+qxhat<-0.00927+0.570217*qs
+qxhat
+```
